@@ -45,11 +45,10 @@ describe("release manifest", () => {
     }
   })
 
-  test("keeps the public implementation plan copy exact", async () => {
-    const internalPlan = await Bun.file(
-      resolve(root, ".claude/files/implementation-plan.md"),
-    ).text()
+  test("ignores local agent inputs and keeps the public implementation plan available", async () => {
+    const ignoreRules = await Bun.file(resolve(root, ".gitignore")).text()
     const publicPlan = await Bun.file(resolve(root, "docs/implementation-plan.md")).text()
-    expect(publicPlan).toBe(internalPlan)
+    expect(ignoreRules.split(/\r?\n/)).toContain(".claude/files/")
+    expect(publicPlan).toStartWith("# TickTick CLI — Implementation Plan")
   })
 })

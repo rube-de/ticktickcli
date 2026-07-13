@@ -9,5 +9,6 @@ coverage/
 *.db-journal
 *.db-shm
 *.db-wal
+.claude/files/
 .claude/settings.local.json
 .DS_Store

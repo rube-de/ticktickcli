@@ -32,7 +32,7 @@ This document provides a comprehensive, authoritative reference for the API laye
 > confirmed (v1 differs and honors it). See `api-v2-live-verified.md` for first-hand
 > wire facts, which override this file wherever they conflict.
 > The project's source of truth is the capability manifest in
-> `.claude/files/implementation-plan.md` §3 — use this file only for V2 wire details.
+> `docs/implementation-plan.md` §3 — use this file only for V2 wire details.
 
 ---
 
