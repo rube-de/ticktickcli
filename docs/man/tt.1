@@ -1,0 +1,337 @@
+.\" Generated from src/commands/metadata.ts; do not edit directly.
+.TH TT 1 "2026-07-13" "tt 0.0.1" "TickTick CLI Manual"
+.SH NAME
+tt \- agent-first TickTick command-line interface
+.SH SYNOPSIS
+.B tt
+.RI [ global-options ]
+.I command
+.RI [ command-options ]
+.SH DESCRIPTION
+.B tt
+provides deterministic, headless access to TickTick and capability-gated
+Dida365 operations. Use \-\-json and \-\-no-input for automation.
+Structured results are written to stdout and diagnostics to stderr.
+.SH GLOBAL OPTIONS
+.TP
+.B \-\-json
+Emit a versioned JSON envelope.
+.TP
+.B \-\-no-input
+Disable prompts, pickers, editors, and browser launches.
+.TP
+.B \-\-profile NAME
+Select a profile for this invocation.
+.TP
+.B \-\-fresh, \-\-stale-ok, \-\-offline
+Select one cache freshness policy.
+.TP
+.B \-\-dry-run
+Normalize and report a mutation without sending it.
+.TP
+.B \-\-yes
+Confirm a destructive non-interactive operation without selecting defaults.
+.SH COMMANDS
+.TP
+.B tt task add
+Create a task.
+.TP
+.B tt task list
+List active tasks.
+.TP
+.B tt task show
+Show one task.
+.TP
+.B tt task edit
+Edit a task.
+.TP
+.B tt task complete
+Complete tasks.
+.TP
+.B tt task delete
+Delete tasks.
+.TP
+.B tt task move
+Move a task.
+.TP
+.B tt task reopen
+Reopen a task.
+.TP
+.B tt task completed
+List completed tasks.
+.TP
+.B tt task pin
+Pin a task.
+.TP
+.B tt task unpin
+Unpin a task.
+.TP
+.B tt task checklist add
+Add a checklist item.
+.TP
+.B tt task checklist complete
+Complete a checklist item.
+.TP
+.B tt task checklist delete
+Delete a checklist item.
+.TP
+.B tt comment list
+List task comments.
+.TP
+.B tt comment add
+Add a task comment.
+.TP
+.B tt comment delete
+Delete a task comment.
+.TP
+.B tt project list
+List projects.
+.TP
+.B tt project show
+Show a project.
+.TP
+.B tt project add
+Create a project.
+.TP
+.B tt project edit
+Edit a project.
+.TP
+.B tt project delete
+Delete a project.
+.TP
+.B tt project archive
+Archive a project.
+.TP
+.B tt project unarchive
+Unarchive a project.
+.TP
+.B tt group list
+List project groups.
+.TP
+.B tt group add
+Create a project group.
+.TP
+.B tt group rename
+Rename a project group.
+.TP
+.B tt group delete
+Delete a project group.
+.TP
+.B tt column list
+List project columns.
+.TP
+.B tt column add
+Create a project column.
+.TP
+.B tt column edit
+Edit a project column.
+.TP
+.B tt column delete
+Delete a project column.
+.TP
+.B tt tag list
+List tags.
+.TP
+.B tt tag add
+Create a tag.
+.TP
+.B tt tag rename
+Rename a tag.
+.TP
+.B tt tag merge
+Merge tags.
+.TP
+.B tt tag delete
+Delete a tag.
+.TP
+.B tt filter list
+List saved filters.
+.TP
+.B tt filter show
+Show a saved filter.
+.TP
+.B tt filter add
+Create a saved filter.
+.TP
+.B tt filter edit
+Edit a saved filter.
+.TP
+.B tt filter delete
+Delete a saved filter.
+.TP
+.B tt habit list
+List habits.
+.TP
+.B tt habit show
+Show a habit.
+.TP
+.B tt habit checkin
+Check in habits.
+.TP
+.B tt habit log
+List habit check\-ins.
+.TP
+.B tt habit add
+Create a habit.
+.TP
+.B tt habit edit
+Edit a habit.
+.TP
+.B tt habit stats
+Show habit statistics.
+.TP
+.B tt focus list
+List focus records.
+.TP
+.B tt focus log
+Log focus time.
+.TP
+.B tt focus delete
+Delete a focus record.
+.TP
+.B tt focus stats
+Show focus statistics.
+.TP
+.B tt focus heatmap
+Show a focus heatmap.
+.TP
+.B tt calendar accounts
+List calendar accounts.
+.TP
+.B tt calendar subscriptions
+List calendar subscriptions.
+.TP
+.B tt calendar events
+List calendar events.
+.TP
+.B tt trash list
+List trashed tasks.
+.TP
+.B tt trash restore
+Restore a trashed task.
+.TP
+.B tt auth token
+Save a v1 API token.
+.TP
+.B tt auth session
+Save a v2 session.
+.TP
+.B tt auth status
+Show credential status.
+.TP
+.B tt auth logout
+Remove credentials.
+.TP
+.B tt profile list
+List profiles.
+.TP
+.B tt profile add
+Add a profile.
+.TP
+.B tt profile remove
+Remove a profile.
+.TP
+.B tt profile use
+Select a profile.
+.TP
+.B tt cache status
+Show cache status.
+.TP
+.B tt cache clear
+Clear cached account data.
+.TP
+.B tt context list
+List saved contexts.
+.TP
+.B tt context use
+Select a context.
+.TP
+.B tt context off
+Disable the active context.
+.TP
+.B tt alias list
+List aliases.
+.TP
+.B tt alias set
+Set an argument alias.
+.TP
+.B tt alias remove
+Remove an alias.
+.TP
+.B tt config get
+Read configuration.
+.TP
+.B tt config set
+Set configuration.
+.TP
+.B tt completion bash
+Print Bash completion.
+.TP
+.B tt completion zsh
+Print Zsh completion.
+.TP
+.B tt completion fish
+Print Fish completion.
+.TP
+.B tt api get
+Perform a read\-only relative API request.
+.TP
+.B tt export ics
+Export tasks as RFC 5545 calendar data.
+.TP
+.B tt sync
+Synchronize local state.
+.TP
+.B tt doctor
+Diagnose configuration and credentials.
+.TP
+.B tt search
+Search tasks.
+.TP
+.B tt stats
+Show account statistics.
+.TP
+.B tt countdown list
+List countdowns.
+.TP
+.B tt today
+Show today's tasks.
+.TP
+.B tt tomorrow
+Show tomorrow's tasks.
+.TP
+.B tt week
+Show this week's tasks.
+.TP
+.B tt inbox
+Show inbox tasks.
+.TP
+.B tt overdue
+Show overdue tasks.
+.TP
+.B tt upcoming
+Show upcoming tasks.
+.TP
+.B tt all
+Show all active tasks.
+.TP
+.B tt next
+Show the next recommended task.
+.TP
+.B tt agenda
+Show a date agenda.
+.TP
+.B tt add
+Quick\-add a task.
+.SH EXIT STATUS
+0 indicates success; 2 invalid input; 3 missing authentication or capability;
+4 not found or ambiguous; 5 conflict or partial failure; 6 network, rate limit,
+or unknown write outcome; 7 protocol drift; and 8 local configuration, cache,
+or storage failure.
+.SH FILES
+Configuration, credentials, cache, and logs use separate platform-correct
+locations under the stable application identifier ticktickcli. Use tt doctor
+and tt config instead of relying on a hard-coded path.
+.SH SEE ALSO
+The package documentation includes authentication.md, configuration.md, and
+commands.md.
