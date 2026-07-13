@@ -100,8 +100,8 @@ jobs:
             process.stdout.write(manifest.version);
           ')"
 
-          [[ "$manifest_name" == "ticktickcli" ]] || {
-            echo "Expected package name ticktickcli, got ${manifest_name}" >&2
+          [[ "$manifest_name" == "@rube-de/ticktickcli" ]] || {
+            echo "Expected package name @rube-de/ticktickcli, got ${manifest_name}" >&2
             exit 1
           }
           [[ "$manifest_version" == "$expected_version" ]] || {
@@ -272,15 +272,23 @@ jobs:
             }
           ' "$manifest_file"
 
-          [[ "$package_name" == "ticktickcli" ]] || {
-            echo "Expected package name ticktickcli, got ${package_name}" >&2
+          [[ "$package_name" == "@rube-de/ticktickcli" ]] || {
+            echo "Expected package name @rube-de/ticktickcli, got ${package_name}" >&2
             exit 1
           }
           [[ "$package_version" == "${RELEASE_TAG#v}" ]] || {
             echo "Artifact version ${package_version} does not match ${RELEASE_TAG}" >&2
             exit 1
           }
-          [[ "$(basename "$tarball")" == "${package_name}-${package_version}.tgz" ]] || {
+          expected_filename="$(node -e '
+            const [name, version] = process.argv.slice(1);
+            if (!name.startsWith("@") || !name.includes("/")) process.exit(1);
+            process.stdout.write(`${name.slice(1).replace("/", "-")}-${version}.tgz`);
+          ' "$package_name" "$package_version")" || {
+            echo "Could not derive an npm tarball filename for ${package_name}@${package_version}" >&2
+            exit 1
+          }
+          [[ "$(basename "$tarball")" == "$expected_filename" ]] || {
             echo "Artifact filename does not match ${package_name}@${package_version}" >&2
             exit 1
           }

@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "ticktickcli",
+      "name": "@rube-de/ticktickcli",
       "dependencies": {
         "@js-temporal/polyfill": "^0.5.1",
         "chalk": "^5.4.1",

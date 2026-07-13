@@ -22,14 +22,14 @@ Windows is not currently a supported release target.
 Install the public release from npm:
 
 ```sh
-npm install --global ticktickcli
+npm install --global @rube-de/ticktickcli
 tt --help
 ```
 
 For a one-off invocation with Bun:
 
 ```sh
-bunx --package ticktickcli tt --help
+bunx --package @rube-de/ticktickcli tt --help
 ```
 
 For repository development:
@@ -46,7 +46,8 @@ Copy and paste this prompt into a coding agent that has terminal access to your 
 machine:
 
 ```text
-Install and verify TickTick CLI (`ticktickcli`, executable `tt`) on this machine.
+Install and verify TickTick CLI (npm package `@rube-de/ticktickcli`, executable `tt`) on this
+machine.
 
 Before starting, read the Install and Authenticate without a browser sections in README.md and
 the detailed docs/authentication.md guide. If this is not a source checkout, use these canonical
@@ -59,8 +60,8 @@ copies:
 Treat those docs and `tt --help` as authoritative; do not invent credential names or commands.
 
 1. Check the operating system and confirm Bun 1.3.14 or newer is available.
-2. Prefer `npm install --global ticktickcli` without `sudo`. During the initial `0.1.0` bootstrap,
-   if npm reports that the package does not exist and this is a source checkout, use
+2. Prefer `npm install --global @rube-de/ticktickcli` without `sudo`. If npm reports that the
+   package does not exist and this is a source checkout, use
    `bun install --frozen-lockfile` followed by `bun link`.
 3. Run `tt --version` and `tt --help`, then report the installed executable path and version.
 4. Summarize the documented v1 token and v2 session choices and ask which one I want to configure.

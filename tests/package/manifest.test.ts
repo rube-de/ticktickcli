@@ -3,6 +3,7 @@ import { resolve } from "node:path"
 import { VERSION } from "../../src/version"
 
 interface PackageManifest {
+  name: string
   version: string
   private: boolean
   bin: Record<string, string>
@@ -25,6 +26,7 @@ const manifest = (await Bun.file(resolve(root, "package.json")).json()) as Packa
 
 describe("release manifest", () => {
   test("declares the publishable Bun CLI contract", () => {
+    expect(manifest.name).toBe("@rube-de/ticktickcli")
     expect(manifest.private).toBe(false)
     expect(manifest.version).toBe(VERSION)
     expect(manifest.bin).toEqual({ tt: "src/index.ts" })

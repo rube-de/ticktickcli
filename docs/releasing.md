@@ -1,8 +1,8 @@
 # Releasing
 
-`ticktickcli` uses two release paths:
+`@rube-de/ticktickcli` uses two release paths:
 
-- `0.1.0` is published directly from the tagged commit by a human using npm two-factor
+- `0.1.1` is published directly from the tagged commit by a human using npm two-factor
   authentication (2FA). npm cannot configure trusted or staged publishing until the package
   already exists.
 - Every later release is packaged by GitHub Actions, submitted to npm with short-lived OpenID
@@ -12,17 +12,22 @@
 Only stable SemVer releases are supported. Release tags are `vX.Y.Z`, and approved packages use
 the `latest` npm dist-tag. Do not configure an `NPM_TOKEN` or `NODE_AUTH_TOKEN` in GitHub.
 
+The existing `v0.1.0` tag is intentionally preserved as an unpublished historical tag. npm
+rejected the unscoped `ticktickcli` package name because it is too similar to `ticktick-cli`; do
+not move or publish a GitHub Release for that tag. The first npm release is the scoped package
+`@rube-de/ticktickcli@0.1.1`.
+
 Use these release tool versions:
 
 - Bun `1.3.14`
 - Node.js 24
 - npm `11.18.0`
 
-## One-time setup and `0.1.0` bootstrap
+## One-time setup and `0.1.1` bootstrap
 
 ### 1. Prepare npm and GitHub
 
-1. Create or sign in to the npm account that will own `ticktickcli`, verify its email address,
+1. Create or sign in to the npm account that owns the `@rube-de` scope, verify its email address,
    enable 2FA, and store the recovery codes somewhere safe. npm requires 2FA for an interactive
    publish. See [npm's publishing authentication guidance][npm-2fa].
 2. In the GitHub repository, create an environment named `npm`:
@@ -32,15 +37,16 @@ Use these release tool versions:
      release gate.
 3. Merge and push the release implementation to `main`, and wait for the macOS and Ubuntu CI jobs
    to pass.
-4. Check that the package name is still available:
+4. Check that the scoped package has not already been published:
 
    ```sh
-   npm view ticktickcli --registry=https://registry.npmjs.org/
+   npm view @rube-de/ticktickcli --registry=https://registry.npmjs.org/
    ```
 
    Continue only when npm returns a genuine `E404` for an unknown package. An authentication,
    authorization, DNS, TLS, timeout, or other network error does not prove that the name is
-   available. If another owner has claimed the name, stop and choose a different package name.
+   available. If npm finds an existing version, stop and choose a new version; never reuse a
+   published version.
 
 ### 2. Tag and test the exact commit
 
@@ -53,12 +59,12 @@ git status --short
 bun --version
 node --version
 npm --version
-test "$(node -p "require('./package.json').version")" = "0.1.0"
+test "$(node -p "require('./package.json').version")" = "0.1.1"
 bun install --frozen-lockfile --ignore-scripts
 bun run check
 git status --short
-git tag -a v0.1.0 -m "ticktickcli v0.1.0"
-git push origin v0.1.0
+git tag -a v0.1.1 -m "ticktickcli v0.1.1"
+git push origin v0.1.1
 ```
 
 Both `git status --short` commands must print nothing. Confirm the reported tool versions match the
@@ -69,7 +75,7 @@ versions above before creating the tag. Do not move or replace the tag after pus
 Publish from a detached checkout of that exact tag, not from a later working-tree state:
 
 ```sh
-git switch --detach v0.1.0
+git switch --detach v0.1.1
 bun install --frozen-lockfile --ignore-scripts
 bun run check
 git status --short
@@ -84,10 +90,10 @@ complete npm's 2FA challenge. This is the only release that is published directl
 Verify the live metadata and a clean installation before continuing:
 
 ```sh
-npm view ticktickcli@0.1.0 name version dist-tags.latest dist.integrity \
+npm view @rube-de/ticktickcli@0.1.1 name version dist-tags.latest dist.integrity \
   --json --registry=https://registry.npmjs.org/
 release_prefix="$(mktemp -d)"
-npm install --global --prefix "$release_prefix" ticktickcli@0.1.0 \
+npm install --global --prefix "$release_prefix" @rube-de/ticktickcli@0.1.1 \
   --registry=https://registry.npmjs.org/
 "$release_prefix/bin/tt" --version
 "$release_prefix/bin/tt" --help
@@ -95,11 +101,11 @@ rm -rf -- "$release_prefix"
 unset release_prefix
 ```
 
-The version command must report `0.1.0`, and help must exit successfully.
+The version command must report `0.1.1`, and help must exit successfully.
 
 ### 4. Enable stage-only trusted publishing
 
-After `0.1.0` exists on npmjs.com, open the package settings and add a trusted publisher with
+After `@rube-de/ticktickcli@0.1.1` exists on npmjs.com, open the package settings and add a trusted publisher with
 these exact values:
 
 | Setting | Value |
@@ -116,7 +122,7 @@ access**, select **Require two-factor authentication and disallow tokens**, and 
 unused npm write tokens. See npm's [trusted publishing][npm-trusted] and [staged
 publishing][npm-staged] documentation for the security model.
 
-Finally, create a GitHub Release for the existing `v0.1.0` tag and publish it. The release workflow
+Finally, create a GitHub Release for the existing `v0.1.1` tag and publish it. The release workflow
 must find the already-published version with identical SHA-512 integrity and finish successfully as
 an idempotent no-op. It must not create a staged copy. This manually published bootstrap release
 will not have GitHub Actions provenance.
@@ -125,13 +131,13 @@ will not have GitHub Actions provenance.
 
 ### 1. Prepare the release commit
 
-Choose the next stable SemVer version. The example below uses `0.1.1`:
+Choose the next stable SemVer version. The example below uses `0.1.2`:
 
 ```sh
 git switch main
 git pull --ff-only
 git status --short
-npm version 0.1.1 --no-git-tag-version
+npm version 0.1.2 --no-git-tag-version
 bun run docs:generate
 bun run check
 git diff --check
@@ -146,7 +152,7 @@ the release from a different commit.
 
 In GitHub, draft a release with all of the following properties:
 
-- The new tag is exactly `vX.Y.Z`, matching `package.json` (for example, `v0.1.1`).
+- The new tag is exactly `vX.Y.Z`, matching `package.json` (for example, `v0.1.2`).
 - The target is the tested commit on `main`.
 - The release notes describe the user-visible changes.
 - The release is a normal stable release, not a prerelease.
@@ -173,7 +179,7 @@ before approval. npm 11.18.0 also supports this review flow from the CLI:
 
 ```sh
 npm login --registry=https://registry.npmjs.org/
-npm stage list ticktickcli --registry=https://registry.npmjs.org/
+npm stage list @rube-de/ticktickcli --registry=https://registry.npmjs.org/
 npm stage view STAGE_ID --registry=https://registry.npmjs.org/
 npm stage download STAGE_ID --registry=https://registry.npmjs.org/
 ```
@@ -193,11 +199,11 @@ version. Do not approve an artifact on the assumption that its version can be re
 Replace `X.Y.Z` with the approved version:
 
 ```sh
-npm view ticktickcli@X.Y.Z name version dist.integrity \
+npm view @rube-de/ticktickcli@X.Y.Z name version dist.integrity \
   --json --registry=https://registry.npmjs.org/
-npm view ticktickcli dist-tags.latest --registry=https://registry.npmjs.org/
+npm view @rube-de/ticktickcli dist-tags.latest --registry=https://registry.npmjs.org/
 release_prefix="$(mktemp -d)"
-npm install --global --prefix "$release_prefix" ticktickcli@X.Y.Z \
+npm install --global --prefix "$release_prefix" @rube-de/ticktickcli@X.Y.Z \
   --registry=https://registry.npmjs.org/
 "$release_prefix/bin/tt" --version
 "$release_prefix/bin/tt" --help
@@ -218,7 +224,7 @@ provenance][npm-provenance].
 - **The registry lookup fails for a reason other than `E404`:** no package is staged. Correct the
   npm, OIDC, DNS, TLS, or service problem, then rerun the failed job.
 - **A stage command has an ambiguous result:** inspect **Staged Packages** or run `npm stage list
-  ticktickcli` before retrying. If the stage exists, review that exact stage instead of submitting
+  @rube-de/ticktickcli` before retrying. If the stage exists, review that exact stage instead of submitting
   it again. If it does not exist, rerun the failed job.
 - **The version is already public with identical integrity:** the workflow's successful no-op is
   expected; no approval is required.
