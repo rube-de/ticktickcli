@@ -1,6 +1,6 @@
 {
   "name": "ticktickcli",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "private": false,
   "description": "Agent-first TickTick CLI for tasks, projects, habits, focus, and calendar data",
   "type": "module",
@@ -24,7 +24,7 @@
     "agents"
   ],
   "bin": {
-    "tt": "./src/index.ts"
+    "tt": "src/index.ts"
   },
   "files": [
     "src",
@@ -33,6 +33,7 @@
     "docs/command-index.md",
     "docs/commands.md",
     "docs/configuration.md",
+    "docs/releasing.md",
     "docs/man/tt.1",
     "README.md",
     "LICENSE"
@@ -71,6 +72,7 @@
     "typescript": "^5.7.3"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   }
 }

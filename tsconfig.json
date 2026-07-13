@@ -3,6 +3,7 @@
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "bundler",
+    "resolveJsonModule": true,
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "types": ["bun"],
     "strict": true,

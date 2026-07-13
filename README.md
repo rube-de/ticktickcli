@@ -19,7 +19,7 @@ Windows is not currently a supported release target.
 
 ## Install
 
-After the package is published:
+Install the public release from npm:
 
 ```sh
 npm install --global ticktickcli
@@ -59,8 +59,9 @@ copies:
 Treat those docs and `tt --help` as authoritative; do not invent credential names or commands.
 
 1. Check the operating system and confirm Bun 1.3.14 or newer is available.
-2. Prefer `npm install --global ticktickcli` without `sudo`. If the package is not published and
-   this is a source checkout, use `bun install --frozen-lockfile` followed by `bun link`.
+2. Prefer `npm install --global ticktickcli` without `sudo`. During the initial `0.1.0` bootstrap,
+   if npm reports that the package does not exist and this is a source checkout, use
+   `bun install --frozen-lockfile` followed by `bun link`.
 3. Run `tt --version` and `tt --help`, then report the installed executable path and version.
 4. Summarize the documented v1 token and v2 session choices and ask which one I want to configure.
    Do not read, print, transmit, or ask me to paste credentials into chat. Use only the documented
@@ -177,6 +178,7 @@ Structured output goes to stdout. Diagnostics and progress go to stderr. `--json
 - [Configuration and profiles](docs/configuration.md)
 - [Command and machine contract reference](docs/commands.md)
 - [Generated command index](docs/command-index.md)
+- [Release process](docs/releasing.md)
 - [Implementation plan](docs/implementation-plan.md)
 - [API research provenance](docs/reference/README.md)
 

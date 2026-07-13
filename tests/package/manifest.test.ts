@@ -1,7 +1,9 @@
 import { describe, expect, test } from "bun:test"
 import { resolve } from "node:path"
+import { VERSION } from "../../src/version"
 
 interface PackageManifest {
+  version: string
   private: boolean
   bin: Record<string, string>
   files: string[]
@@ -12,6 +14,10 @@ interface PackageManifest {
     type: string
     url: string
   }
+  publishConfig: {
+    access: string
+    registry: string
+  }
 }
 
 const root = resolve(import.meta.dir, "../..")
@@ -20,16 +26,22 @@ const manifest = (await Bun.file(resolve(root, "package.json")).json()) as Packa
 describe("release manifest", () => {
   test("declares the publishable Bun CLI contract", () => {
     expect(manifest.private).toBe(false)
-    expect(manifest.bin).toEqual({ tt: "./src/index.ts" })
+    expect(manifest.version).toBe(VERSION)
+    expect(manifest.bin).toEqual({ tt: "src/index.ts" })
     expect(manifest.engines.bun).toBeDefined()
     expect(manifest.repository.type).toBe("git")
     expect(manifest.repository.url).toStartWith("git+")
+    expect(manifest.publishConfig).toEqual({
+      access: "public",
+      registry: "https://registry.npmjs.org/",
+    })
   })
 
   test("uses an explicit package allowlist", () => {
     expect(manifest.files).toContain("src")
     expect(manifest.files).toContain("skills/SKILL.md")
     expect(manifest.files).toContain("docs/command-index.md")
+    expect(manifest.files).toContain("docs/releasing.md")
     expect(manifest.files).toContain("docs/man/tt.1")
     expect(manifest.files.some((path) => path.startsWith(".claude"))).toBe(false)
     expect(manifest.files.some((path) => path.startsWith("docs/reference"))).toBe(false)

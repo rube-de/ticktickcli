@@ -1,7 +1,8 @@
 import assert from "node:assert/strict"
-import { mkdir, mkdtemp, readFile, rm, stat } from "node:fs/promises"
+import { constants } from "node:fs"
+import { copyFile, lstat, mkdir, mkdtemp, readFile, readdir, rm, stat } from "node:fs/promises"
 import { tmpdir } from "node:os"
-import { join, resolve } from "node:path"
+import { basename, join, resolve } from "node:path"
 
 interface CommandResult {
   stdout: string
@@ -21,6 +22,44 @@ interface PackResult {
 interface PackageManifest {
   name: string
   version: string
+}
+
+interface Options {
+  artifactDirectory?: string
+}
+
+function parseArguments(args: readonly string[]): Options {
+  if (args.length === 0) {
+    return {}
+  }
+
+  if (args.length !== 2 || args[0] !== "--artifact-dir" || !args[1]) {
+    throw new Error("Usage: package-smoke.ts [--artifact-dir <dir>]")
+  }
+
+  return { artifactDirectory: resolve(args[1]) }
+}
+
+async function prepareArtifactDirectory(directory: string): Promise<void> {
+  try {
+    const directoryStats = await lstat(directory)
+    assert.ok(
+      directoryStats.isDirectory() && !directoryStats.isSymbolicLink(),
+      `artifact path must be a directory, not a file or symbolic link: ${directory}`,
+    )
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+      throw error
+    }
+    await mkdir(directory, { recursive: true })
+  }
+
+  const existingTarballs = (await readdir(directory)).filter((entry) => entry.endsWith(".tgz"))
+  assert.deepEqual(
+    existingTarballs,
+    [],
+    `artifact directory already contains a .tgz file: ${existingTarballs.join(", ")}`,
+  )
 }
 
 async function run(
@@ -68,13 +107,19 @@ function cleanEnvironment(home: string): Record<string, string> {
 }
 
 async function main(): Promise<void> {
+  const { artifactDirectory } = parseArguments(process.argv.slice(2))
   const root = resolve(import.meta.dir, "..")
+  if (artifactDirectory) {
+    await prepareArtifactDirectory(artifactDirectory)
+  }
+
   const temporaryRoot = await mkdtemp(join(tmpdir(), "tt-package-smoke-"))
   const packageDirectory = join(temporaryRoot, "pack")
   const unpackDirectory = join(temporaryRoot, "unpacked")
   const installDirectory = join(temporaryRoot, "install")
   const executionDirectory = join(temporaryRoot, "execution")
   const homeDirectory = join(temporaryRoot, "home")
+  const retainedArtifactDirectory = artifactDirectory ?? join(temporaryRoot, "retained")
 
   try {
     await Promise.all([
@@ -97,6 +142,12 @@ async function main(): Promise<void> {
 
     const packResult = packResults[0]
     assert.ok(packResult, "npm pack did not report an artifact")
+    assert.equal(
+      packResult.filename,
+      basename(packResult.filename),
+      "npm pack reported an unsafe artifact filename",
+    )
+    assert.ok(packResult.filename.endsWith(".tgz"), "npm pack artifact must use the .tgz extension")
     const packedPaths = new Set(packResult.files.map((file) => file.path))
 
     for (const requiredPath of [
@@ -109,6 +160,7 @@ async function main(): Promise<void> {
       "docs/command-index.md",
       "docs/commands.md",
       "docs/configuration.md",
+      "docs/releasing.md",
       "docs/man/tt.1",
     ]) {
       assert.ok(packedPaths.has(requiredPath), `package is missing ${requiredPath}`)
@@ -166,6 +218,13 @@ async function main(): Promise<void> {
       bunxVersion.stdout.includes(manifest.version),
       `bunx tt --version did not contain ${manifest.version}`,
     )
+
+    await prepareArtifactDirectory(retainedArtifactDirectory)
+    const retainedTarball = join(retainedArtifactDirectory, packResult.filename)
+    await copyFile(tarball, retainedTarball, constants.COPYFILE_EXCL)
+    if (artifactDirectory) {
+      process.stdout.write(`Verified package artifact retained at ${retainedTarball}\n`)
+    }
 
     process.stdout.write(
       `Package smoke test passed for ${manifest.name}@${manifest.version} (${packedPaths.size} files)\n`,

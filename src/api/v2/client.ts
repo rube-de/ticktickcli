@@ -1,4 +1,5 @@
 import type { TaskCreateInput, TaskPatchInput } from "../../domain/inputs"
+import { VERSION } from "../../version"
 import type { ApiHost } from "../capabilities"
 import {
   AppError,
@@ -121,7 +122,7 @@ export class V2Client {
             version: options.deviceVersion ?? 6430,
             id: deviceId,
           }),
-          "user-agent": options.userAgent ?? "Mozilla/5.0 (compatible; TickTickCLI/0.0.1)",
+          "user-agent": options.userAgent ?? `Mozilla/5.0 (compatible; TickTickCLI/${VERSION})`,
         },
         timeoutMs: options.timeoutMs,
         maxReadRetries: options.maxReadRetries,

@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test"
 import { AppError, PartialFailureError } from "../src/api/errors"
 import { V2Client } from "../src/api/v2/client"
+import { VERSION } from "../src/version"
 import { createSequenceFetch, jsonResponse, requestAt, requestJson } from "./api-test-helpers"
 
 const TASK = {
@@ -38,6 +39,7 @@ describe("V2Client", () => {
     expect(state.checkPoint).toBe(123)
     expect(mock.requests[0]?.url.pathname).toBe("/api/v2/batch/check/0")
     expect(headers.get("cookie")).toBe("t=session-secret")
+    expect(headers.get("user-agent")).toBe(`Mozilla/5.0 (compatible; TickTickCLI/${VERSION})`)
     expect(JSON.parse(headers.get("x-device") ?? "{}")).toEqual({
       platform: "web",
       version: 6430,

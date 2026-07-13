@@ -18,8 +18,9 @@ import { type AppConfig, loadConfig } from "./config"
 import { errorEnvelope } from "./output/contract"
 import { renderOutput } from "./output/render"
 import { resolvePaths } from "./platform/paths"
+import { VERSION } from "./version"
 
-export const VERSION = "0.0.1"
+export { VERSION }
 
 export function createProgram(): Command {
   const program = new Command()
