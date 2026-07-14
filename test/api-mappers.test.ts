@@ -1,8 +1,19 @@
 import { describe, expect, test } from "bun:test"
 import { mapV1Habit, mapV1Task } from "../src/api/v1/mapper"
 import { V1HabitSchema, V1TaskSchema } from "../src/api/v1/schemas"
-import { mapV2CalendarEvent, mapV2Filter, mapV2Task, toV2TaskCreate } from "../src/api/v2/mapper"
-import { V2CalendarEventSchema, V2FilterSchema, V2TaskSchema } from "../src/api/v2/schemas"
+import {
+  mapV2CalendarEvent,
+  mapV2Filter,
+  mapV2Project,
+  mapV2Task,
+  toV2TaskCreate,
+} from "../src/api/v2/mapper"
+import {
+  V2CalendarEventSchema,
+  V2FilterSchema,
+  V2ProjectSchema,
+  V2TaskSchema,
+} from "../src/api/v2/schemas"
 
 describe("API mappers", () => {
   test("normalizes v1 task status, dates, checklist, and retains additive raw fields", () => {
@@ -47,6 +58,55 @@ describe("API mappers", () => {
     expect(task.status).toBe("wont_do")
     expect(task.pinnedTime).toBeUndefined()
     expect(task.deleted).toBe(true)
+  })
+
+  test("treats null v2 project color, viewMode, and permission as absent", () => {
+    const project = mapV2Project(
+      V2ProjectSchema.parse({
+        id: "project-1",
+        name: "Work",
+        color: null,
+        viewMode: null,
+        permission: null,
+      }),
+      { fetchedAt: "2026-07-13T10:00:00Z" },
+    )
+    expect(project).not.toHaveProperty("color")
+    expect(project).not.toHaveProperty("viewMode")
+    expect(project).not.toHaveProperty("permission")
+  })
+
+  test("treats null v2 task dates as absent", () => {
+    const task = mapV2Task(
+      V2TaskSchema.parse({
+        id: "task-1",
+        projectId: "project-1",
+        title: "Task",
+        startDate: null,
+        dueDate: null,
+        completedTime: null,
+        createdTime: null,
+        modifiedTime: null,
+      }),
+      { fetchedAt: "2026-07-13T10:00:00Z" },
+    )
+    expect(task).not.toHaveProperty("startDate")
+    expect(task).not.toHaveProperty("dueDate")
+    expect(task).not.toHaveProperty("completedTime")
+  })
+
+  test("treats null v2 checklist dates as absent and keeps a string repeatFrom", () => {
+    const wire = V2TaskSchema.parse({
+      id: "task-1",
+      projectId: "project-1",
+      title: "Task",
+      repeatFrom: "2",
+      items: [{ id: "item-1", title: "Step", completedTime: null, startDate: null }],
+    })
+    expect(wire.repeatFrom).toBe("2")
+    const item = mapV2Task(wire, { fetchedAt: "2026-07-13T10:00:00Z" }).checklist[0]
+    expect(item).not.toHaveProperty("startDate")
+    expect(item).not.toHaveProperty("completedTime")
   })
 
   test("keeps parent assignment out of the v2 add item for the required second request", () => {

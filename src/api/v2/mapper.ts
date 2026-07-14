@@ -98,9 +98,11 @@ export function mapV2Task(task: V2Task, options: V2MapperOptions = {}): DomainTa
     ...(task.content === undefined ? {} : { content: task.content }),
     ...(task.desc === undefined ? {} : { description: task.desc }),
     ...(task.timeZone === undefined ? {} : { timeZone: task.timeZone }),
-    ...(startDate === undefined ? {} : { startDate, rawStartDate: task.startDate }),
-    ...(dueDate === undefined ? {} : { dueDate, rawDueDate: task.dueDate }),
-    ...(completedTime === undefined ? {} : { completedTime, rawCompletedTime: task.completedTime }),
+    ...(startDate === undefined ? {} : { startDate, rawStartDate: task.startDate ?? undefined }),
+    ...(dueDate === undefined ? {} : { dueDate, rawDueDate: task.dueDate ?? undefined }),
+    ...(completedTime === undefined
+      ? {}
+      : { completedTime, rawCompletedTime: task.completedTime ?? undefined }),
     ...(task.repeatFlag === undefined ? {} : { repeatRule: task.repeatFlag }),
     ...(task.sortOrder === undefined ? {} : { sortOrder: task.sortOrder }),
     ...(task.parentId === undefined ? {} : { parentId: task.parentId }),
@@ -112,6 +114,10 @@ export function mapV2Task(task: V2Task, options: V2MapperOptions = {}): DomainTa
 }
 
 export function mapV2Project(project: V2Project, options: V2MapperOptions = {}): DomainProject {
+  // The wire sends `null` for absent color/viewMode/permission; treat it as absent.
+  const color = project.color ?? undefined
+  const viewMode = project.viewMode ?? undefined
+  const permission = project.permission ?? undefined
   return {
     id: project.id,
     name: project.name,
@@ -121,12 +127,10 @@ export function mapV2Project(project: V2Project, options: V2MapperOptions = {}):
     fetchedAt: options.fetchedAt ?? new Date().toISOString(),
     raw: project,
     ...(project.etag === undefined ? {} : { etag: project.etag }),
-    ...(project.color === undefined ? {} : { color: project.color }),
+    ...(color === undefined ? {} : { color }),
     ...(project.groupId === undefined ? {} : { groupId: project.groupId }),
-    ...(project.viewMode === undefined ? {} : { viewMode: projectViewMode(project.viewMode) }),
-    ...(project.permission === undefined
-      ? {}
-      : { permission: projectPermission(project.permission) }),
+    ...(viewMode === undefined ? {} : { viewMode: projectViewMode(viewMode) }),
+    ...(permission === undefined ? {} : { permission: projectPermission(permission) }),
     ...(project.sortOrder === undefined ? {} : { sortOrder: project.sortOrder }),
   }
 }
@@ -439,29 +443,32 @@ function mapV2ChecklistItem(
   if (!item.id) throw new ProtocolError("Checklist item is missing its id", { taskId, index })
   const timeZone = item.timeZone ?? defaultTimeZone
   const isAllDay = item.isAllDay ?? false
+  // The wire sends `null` for an absent startDate/completedTime; treat it as absent.
+  const startDate = item.startDate ?? undefined
+  const completedTime = item.completedTime ?? undefined
   return {
     id: item.id,
     title: item.title,
     status: item.status === 1 ? "completed" : "open",
     ...(item.sortOrder === undefined ? {} : { sortOrder: item.sortOrder }),
-    ...(item.startDate === undefined
+    ...(startDate === undefined
       ? {}
       : {
           startDate: normalizeRequired(
-            item.startDate,
+            startDate,
             timeZone,
             isAllDay,
             false,
             taskId,
             "items.startDate",
           ),
-          rawStartDate: item.startDate,
+          rawStartDate: startDate,
         }),
-    ...(item.completedTime === undefined
+    ...(completedTime === undefined
       ? {}
       : {
           completedTime: normalizeRequired(
-            item.completedTime,
+            completedTime,
             timeZone,
             false,
             false,
@@ -487,14 +494,15 @@ function toV2ChecklistInput(item: ChecklistItemInput): Record<string, unknown> {
 }
 
 function normalizeOptional(
-  value: string | undefined,
+  value: string | null | undefined,
   timeZone: string,
   isAllDay: boolean,
   isFloating: boolean,
   entityId: string,
   field: string,
 ): string | undefined {
-  return value === undefined
+  // The wire sends `null` for an absent date; treat it as absent.
+  return value === undefined || value === null
     ? undefined
     : normalizeRequired(value, timeZone, isAllDay, isFloating, entityId, field)
 }
