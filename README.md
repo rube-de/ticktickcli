@@ -55,16 +55,16 @@ machine:
 Install and verify TickTick CLI (npm package `@rube-de/ticktickcli`, executable `tt`) on this
 machine.
 
-Before starting, read the Install and Authenticate without a browser sections in README.md and
-the detailed docs/authentication.md guide. If this is not a source checkout, use these canonical
-copies:
+Before starting, read the Install and Authenticate without a browser sections in README.md, the
+detailed docs/authentication.md guide, and skills/SKILL.md. If this is not a source checkout (skill
+files only exist locally after install), use these canonical copies:
 
 - https://github.com/rube-de/ticktickcli#install
 - https://github.com/rube-de/ticktickcli#authenticate-without-a-browser
 - https://github.com/rube-de/ticktickcli/blob/main/docs/authentication.md
+- https://github.com/rube-de/ticktickcli/blob/main/skills/SKILL.md
 
-Treat those docs, `skills/SKILL.md` (if present in this checkout), and `tt --help` as authoritative;
-do not invent credential names or commands.
+Treat those docs and `tt --help` as authoritative; do not invent credential names or commands.
 
 1. Check the operating system and confirm Bun 1.3.14 or newer is available.
 2. Prefer `npm install --global @rube-de/ticktickcli` without `sudo`. If npm reports that the
