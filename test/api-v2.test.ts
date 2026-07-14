@@ -47,6 +47,46 @@ describe("V2Client", () => {
     })
   })
 
+  test("accepts a full-sync snapshot carrying the live nullable and string-typed shapes", async () => {
+    const mock = createSequenceFetch([
+      jsonResponse(
+        sync({
+          projectProfiles: [
+            { id: "project-1", name: "Work", color: null, viewMode: null, permission: null },
+          ],
+          syncTaskBean: {
+            update: [
+              {
+                id: "task-1",
+                projectId: "project-1",
+                title: "Task",
+                repeatFrom: "2",
+                startDate: null,
+                dueDate: null,
+                completedTime: null,
+                createdTime: null,
+                modifiedTime: null,
+                items: [{ id: "item-1", title: "Step", completedTime: null, startDate: null }],
+              },
+            ],
+          },
+        }),
+      ),
+    ])
+    const client = new V2Client({ sessionToken: "session", fetch: mock.fetch })
+    const state = await client.batchCheck("0")
+
+    expect(state.projectProfiles?.[0]).toMatchObject({
+      color: null,
+      viewMode: null,
+      permission: null,
+    })
+    const updated = state.syncTaskBean?.update?.[0]
+    expect(updated?.repeatFrom).toBe("2")
+    expect(updated).toMatchObject({ startDate: null, dueDate: null, completedTime: null })
+    expect(updated?.items?.[0]).toMatchObject({ completedTime: null, startDate: null })
+  })
+
   test("gates incremental sync before any network request", () => {
     let calls = 0
     const client = new V2Client({
