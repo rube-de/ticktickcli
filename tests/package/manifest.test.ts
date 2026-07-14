@@ -41,7 +41,7 @@ describe("release manifest", () => {
 
   test("uses an explicit package allowlist", () => {
     expect(manifest.files).toContain("src")
-    expect(manifest.files).toContain("skills/SKILL.md")
+    expect(manifest.files).toContain("skills/ticktick-cli")
     expect(manifest.files).toContain("docs/command-index.md")
     expect(manifest.files).toContain("docs/releasing.md")
     expect(manifest.files).toContain("docs/man/tt.1")

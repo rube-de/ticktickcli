@@ -10,11 +10,13 @@ code as the contract; never scrape human tables when JSON is available.
 
 ## Establish capability
 
-1. Run `tt auth status --verify --json --no-input` when network capability is unclear.
-2. Read `data.mode`, `data.fullCoverage`, and account-match state without printing credential data.
-3. Use v1 commands with a personal API token and v2-only commands with a verified session.
-4. Treat `capability_missing` as a request for the missing credential, not permission to obtain it.
-5. Never launch OAuth, request a password, or extract a session from a browser — these flows can't be
+1. If `tt` is not on PATH, run `scripts/install.sh` from this skill's directory. It installs the
+   published package via npm and stops before touching credentials.
+2. Run `tt auth status --verify --json --no-input` when network capability is unclear.
+3. Read `data.mode`, `data.fullCoverage`, and account-match state without printing credential data.
+4. Use v1 commands with a personal API token and v2-only commands with a verified session.
+5. Treat `capability_missing` as a request for the missing credential, not permission to obtain it.
+6. Never launch OAuth, request a password, or extract a session from a browser — these flows can't be
    observed in a headless run and would bypass the accepted credential channels below.
 
 Accept credentials only through `TT_ACCESS_TOKEN`, `TT_ACCESS_TOKEN_FILE`, `TT_SESSION_TOKEN`,
