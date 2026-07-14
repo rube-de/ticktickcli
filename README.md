@@ -63,7 +63,8 @@ copies:
 - https://github.com/rube-de/ticktickcli#authenticate-without-a-browser
 - https://github.com/rube-de/ticktickcli/blob/main/docs/authentication.md
 
-Treat those docs and `tt --help` as authoritative; do not invent credential names or commands.
+Treat those docs, `skills/SKILL.md` (if present in this checkout), and `tt --help` as authoritative;
+do not invent credential names or commands.
 
 1. Check the operating system and confirm Bun 1.3.14 or newer is available.
 2. Prefer `npm install --global @rube-de/ticktickcli` without `sudo`. If npm reports that the
@@ -143,6 +144,13 @@ and external OAuth setup.
 
 ## Agent workflow
 
+Agents with access to [Agent Skills](https://agentskills.io) should load
+[`skills/SKILL.md`](skills/SKILL.md) first; harnesses like Claude Code do this automatically when
+it matches. In internal with/without-skill comparisons, agents using it needed roughly a third to
+half as many tool calls for the same tasks (3 vs. 9 to correctly diagnose a missing-capability
+error, 7 vs. 15 to resolve an ambiguous task title) because exit-code semantics, credential channel
+names, and CLI-specific gotchas are stated up front instead of discovered through trial and error.
+
 Use canonical noun–verb commands, explicit fields, JSON output, and non-interactive mode:
 
 ```sh
@@ -181,6 +189,8 @@ Structured output goes to stdout. Diagnostics and progress go to stderr. `--json
 
 ## Documentation
 
+- [Agent Skill](skills/SKILL.md) — canonical command patterns for AI agents; auto-loaded by
+  skill-aware harnesses
 - [Authentication](docs/authentication.md)
 - [Configuration and profiles](docs/configuration.md)
 - [Command and machine contract reference](docs/commands.md)
