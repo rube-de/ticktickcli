@@ -1,5 +1,11 @@
 # TickTick CLI
 
+[![npm version](https://img.shields.io/npm/v/@rube-de/ticktickcli.svg)](https://www.npmjs.com/package/@rube-de/ticktickcli)
+[![npm downloads](https://img.shields.io/npm/dm/@rube-de/ticktickcli.svg)](https://www.npmjs.com/package/@rube-de/ticktickcli)
+[![CI](https://github.com/rube-de/ticktickcli/actions/workflows/ci.yml/badge.svg)](https://github.com/rube-de/ticktickcli/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/npm/l/@rube-de/ticktickcli.svg)](LICENSE)
+[![Bun](https://img.shields.io/badge/Bun-%3E%3D1.3.14-fbf0df?logo=bun&logoColor=black)](https://bun.sh)
+
 `tt` is an agent-first TickTick command-line client for macOS and Linux. It favors a stable
 JSON contract, headless credentials, explicit capability checks, safe mutations, and a
 profile-isolated local cache. Human-friendly rendering and quick-add syntax are layered on top
