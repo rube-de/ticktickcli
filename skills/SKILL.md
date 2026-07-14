@@ -1,6 +1,6 @@
 ---
 name: ticktick-cli
-description: Operate TickTick or Dida365 through the agent-first `tt` command-line interface. Use when an agent needs to inspect, create, edit, complete, organize, search, sync, or report on tasks, projects, tags, habits, focus records, calendar data, profiles, or CLI authentication while preserving deterministic JSON, headless operation, and safe mutation semantics.
+description: Operate TickTick or Dida365 through the agent-first `tt` command-line interface. Use when an agent needs to inspect, create, edit, complete, organize, search, sync, or report on tasks, projects, tags, habits, focus records, calendar data, profiles, or CLI authentication - even if the request doesn't name TickTick or Dida365, e.g. 'add this to my to-do list', 'mark that done', or 'log a pomodoro'.
 ---
 
 # TickTick CLI
@@ -13,12 +13,29 @@ code as the contract; never scrape human tables when JSON is available.
 1. Run `tt auth status --verify --json --no-input` when network capability is unclear.
 2. Read `data.mode`, `data.fullCoverage`, and account-match state without printing credential data.
 3. Use v1 commands with a personal API token and v2-only commands with a verified session.
-4. Treat `capability_missing` as a request for the missing credential, not permission to obtain one.
-5. Never launch OAuth, request a password, or extract a session from a browser.
+4. Treat `capability_missing` as a request for the missing credential, not permission to obtain it.
+5. Never launch OAuth, request a password, or extract a session from a browser — these flows can't be
+   observed in a headless run and would bypass the accepted credential channels below.
 
 Accept credentials only through `TT_ACCESS_TOKEN`, `TT_ACCESS_TOKEN_FILE`, `TT_SESSION_TOKEN`,
 `TT_SESSION_TOKEN_FILE`, `TT_SESSION_COOKIE`, `TT_SESSION_COOKIE_FILE`, or stdin-based auth commands.
 Never place a secret in argv, logs, fixtures, messages, or generated files.
+
+## Gotchas
+
+- `tt cache clear` and `tt auth logout` are independent stores: clearing the cache never touches
+  credentials, and logging out never touches the cache. Clearing one does not imply the other.
+- `data.fullCoverage` means a v1 token AND a v2 session are both present at once (`mode: "hybrid"`) —
+  it does not mean "fully authenticated." A single valid credential still reports `fullCoverage: false`.
+- A v1 token is not enough for every mutation: `task pin/unpin`, `project archive/unarchive`, and
+  focus/organization writes require a verified v2 session even when a valid v1 token exists.
+- Dida365 is excluded from the v1 API entirely — v1 read/write only works against TickTick hosts, so
+  never assume wire behavior is interchangeable between the two.
+- `tt api get` rejects any absolute or protocol-relative path, and rejects a relative path that
+  resolves to a different origin than the one configured.
+- `write_outcome_unknown` means either a post-write readback found zero or multiple matching
+  candidates, or a transport failure happened mid-write. Re-read the resource to reconcile state
+  before retrying — there is no single fixed lookup command for this.
 
 ## Read deterministically
 
@@ -31,7 +48,9 @@ tt search "quarterly report" --json --no-input --stale-ok
 ```
 
 Interpret `meta.source`, `meta.fetchedAt`, and `meta.stale`. Use `--offline` only when network access
-must be forbidden. Do not combine `--fresh`, `--stale-ok`, and `--offline`.
+must be forbidden. Do not combine `--fresh`, `--stale-ok`, and `--offline` — they express contradictory
+freshness intents and are validated as mutually exclusive, so combining any two fails before the
+command runs.
 
 Resolve IDs from command results. Prefer exact IDs, then exact normalized names, then unique ID
 prefixes of at least four characters. Never choose among ambiguous candidates in non-interactive
@@ -84,9 +103,8 @@ data channel. Preserve the envelope even when selecting fields.
 
 ## Preserve boundaries
 
-- Use `tt cache clear` separately from `tt auth logout`; one must not imply the other.
-- Do not assume TickTick and Dida365 wire behavior is identical.
-- Do not use source-only or unverified raw mutations.
-- Use `tt api get` only with a relative path on the configured origin.
-- Prefer canonical commands over user aliases in reusable automation.
-- Do not allow a human picker, browser, or editor in JSON, CI, non-TTY, or `--no-input` mode.
+- Do not use source-only or unverified raw mutations — they bypass the dry-run/verify contract above.
+- Prefer canonical commands over user aliases in reusable automation — aliases are user-local and may
+  not exist in another environment or agent session.
+- Do not allow a human picker, browser, or editor in JSON, CI, non-TTY, or `--no-input` mode — these
+  modes assume no human is present to respond.
