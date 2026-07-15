@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test"
-import { mapV1Habit, mapV1Task } from "../src/api/v1/mapper"
+import { mapV1Habit, mapV1Task, toV1TaskCreate, toV1TaskPatch } from "../src/api/v1/mapper"
 import { V1HabitSchema, V1TaskSchema } from "../src/api/v1/schemas"
 import {
   mapV2CalendarEvent,
@@ -38,6 +38,35 @@ describe("API mappers", () => {
       checklist: [{ id: "item-1", status: "completed" }],
       raw: { futureField: "preserved" },
     })
+  })
+
+  test("anchors a bare create dueDate/startDate at UTC midnight for the v1 write endpoint", () => {
+    const payload = toV1TaskCreate({
+      title: "Task",
+      projectId: "project-1",
+      startDate: "2026-07-15",
+      dueDate: "2026-07-20",
+    })
+    expect(payload.startDate).toBe("2026-07-15T00:00:00.000+0000")
+    expect(payload.dueDate).toBe("2026-07-20T00:00:00.000+0000")
+  })
+
+  test("leaves an already-timed create dueDate untouched", () => {
+    const payload = toV1TaskCreate({
+      title: "Task",
+      projectId: "project-1",
+      dueDate: "2026-07-20T09:00:00+0200",
+    })
+    expect(payload.dueDate).toBe("2026-07-20T09:00:00+0200")
+  })
+
+  test("anchors a bare patch dueDate/startDate and preserves a clearing null", () => {
+    const payload = toV1TaskPatch("task-1", "project-1", {
+      startDate: "2026-07-15",
+      dueDate: null,
+    })
+    expect(payload.startDate).toBe("2026-07-15T00:00:00.000+0000")
+    expect(payload.dueDate).toBeNull()
   })
 
   test("does not guess an unverified habit archive status code", () => {

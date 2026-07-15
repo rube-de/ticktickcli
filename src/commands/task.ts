@@ -84,7 +84,7 @@ function registerTaskAdd(parent: Command): void {
         ...(startDate ? { startDate } : {}),
         ...(dueDate ? { dueDate } : {}),
         ...(options.start || options.due
-          ? { isAllDay: options.allDay || isDateOnly(options.start ?? options.due) }
+          ? { isAllDay: resolveIsAllDay(options.allDay, startDate ?? dueDate) }
           : {}),
         ...(options.priority !== undefined ? { priority: parsePriority(options.priority) } : {}),
         ...(options.tags ? { tags: splitCommaValues(options.tags) } : {}),
@@ -204,19 +204,28 @@ function registerTaskEdit(parent: Command): void {
       const useV2 = options.column !== undefined || options.clearColumn === true
       context.capability(useV2 ? "task.edit.column" : "task.edit")
       const parent = options.parent ? await resolveTask(context, options.parent) : undefined
+      const dueDate =
+        options.due !== undefined
+          ? normalizeInputDate(options.due, context.profile.timeZone)
+          : options.clearDue
+            ? null
+            : undefined
+      const startDate =
+        options.start !== undefined
+          ? normalizeInputDate(options.start, context.profile.timeZone)
+          : options.clearStart
+            ? null
+            : undefined
       const patch: TaskPatchInput = {
         ...(options.title !== undefined ? { title: options.title } : {}),
         ...(options.content !== undefined ? { content: options.content } : {}),
         ...(options.description !== undefined ? { description: options.description } : {}),
-        ...(options.due !== undefined
-          ? { dueDate: normalizeInputDate(options.due, context.profile.timeZone) }
-          : options.clearDue
-            ? { dueDate: null }
-            : {}),
-        ...(options.start !== undefined
-          ? { startDate: normalizeInputDate(options.start, context.profile.timeZone) }
-          : options.clearStart
-            ? { startDate: null }
+        ...(dueDate !== undefined ? { dueDate } : {}),
+        ...(startDate !== undefined ? { startDate } : {}),
+        ...(options.due !== undefined || options.start !== undefined
+          ? { isAllDay: resolveIsAllDay(options.allDay, startDate ?? dueDate ?? undefined) }
+          : options.allDay
+            ? { isAllDay: true }
             : {}),
         ...(options.priority !== undefined ? { priority: parsePriority(options.priority) } : {}),
         ...(options.tags !== undefined ? { tags: splitCommaValues(options.tags) } : {}),
@@ -231,7 +240,6 @@ function registerTaskEdit(parent: Command): void {
           : options.clearColumn
             ? { columnId: null }
             : {}),
-        ...(options.allDay ? { isAllDay: true } : {}),
       }
       if (Object.keys(patch).length === 0) {
         throw new AppError("invalid_input", "At least one edit option is required")
@@ -556,6 +564,18 @@ export function filterTasksForList(
     .slice(0, limit)
 }
 
+/**
+ * A create response is trusted verbatim rather than confirmed via readback below;
+ * that trust is only warranted when it actually reports the date fields the caller
+ * asked to set, since the v1 create endpoint can return a partial body that silently
+ * omits them.
+ */
+export function responseHasRequestedDates(input: TaskCreateInput, response: V1Task): boolean {
+  if (input.dueDate !== undefined && !response.dueDate) return false
+  if (input.startDate !== undefined && !response.startDate) return false
+  return true
+}
+
 async function reconcileCreatedTask(
   context: AppContext,
   input: TaskCreateInput,
@@ -564,7 +584,7 @@ async function reconcileCreatedTask(
 ): Promise<DomainTask> {
   const v1 = context.v1
   if (!v1) throw new AppError("authentication_missing", "A v1 token is required")
-  if (response && !input.parentId) {
+  if (response && !input.parentId && responseHasRequestedDates(input, response)) {
     context.repositories.upsertTasks([{ ...response }], "v1")
     return mapV1Task(response, { defaultTimeZone: context.profile.timeZone })
   }
@@ -634,6 +654,14 @@ function normalizeInputDate(value: string | undefined, timeZone: string): string
 
 function isDateOnly(value: string | undefined): boolean {
   return Boolean(value && /^\d{4}-\d{2}-\d{2}$/.test(value))
+}
+
+/** A bare calendar date implies an all-day task unless the caller says otherwise. */
+export function resolveIsAllDay(
+  explicit: boolean | undefined,
+  sample: string | undefined,
+): boolean {
+  return Boolean(explicit) || isDateOnly(sample)
 }
 
 function parseChecklist(value: string): ChecklistItemInput[] {

@@ -135,6 +135,20 @@ export function normalizeDateTime(
   }
 }
 
+/**
+ * Anchor a bare calendar date at UTC midnight, formatted as the instant string
+ * TickTick's v1 write endpoints require. Bare `YYYY-MM-DD` values are silently
+ * dropped by dueDate/startDate on create/edit rather than persisted. UTC midnight
+ * is used (not a profile-timezone midnight) because the read path recovers an
+ * all-day date from the wire value's literal date prefix (see the `isAllDay`
+ * branch above) rather than reinterpreting it against any timezone — confirmed
+ * against the live API, which echoes the wire value back byte-for-byte unchanged.
+ */
+export function dateOnlyToWireInstant(date: string): string {
+  const canonical = Temporal.PlainDate.from(date).toString()
+  return `${canonical}T00:00:00.000+0000`
+}
+
 export function toInstant(now?: Temporal.Instant | string): Temporal.Instant {
   if (typeof now === "string") return Temporal.Instant.from(normalizeWireOffset(now))
   return now ?? Temporal.Now.instant()
