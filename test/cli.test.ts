@@ -1,12 +1,16 @@
 import { afterAll, describe, expect, test } from "bun:test"
 import { mkdtempSync, rmSync } from "node:fs"
 import { tmpdir } from "node:os"
-import { join } from "node:path"
+import { join, sep } from "node:path"
 
 const root = mkdtempSync(join(tmpdir(), "ticktickcli-subprocess-"))
 const cwd = join(import.meta.dir, "..")
 const environment = {
   ...process.env,
+  // env-paths ignores XDG_* entirely on darwin and always resolves under the
+  // real ~/Library/..., so HOME must be overridden too or these subprocess
+  // tests silently read/write the developer's actual local TickTick state.
+  HOME: join(root, "home"),
   XDG_CONFIG_HOME: join(root, "config"),
   XDG_DATA_HOME: join(root, "data"),
   XDG_CACHE_HOME: join(root, "cache"),
@@ -99,5 +103,17 @@ describe("CLI subprocess contract", () => {
     const result = run(["completion", "bash"])
     expect(result.exitCode).toBe(0)
     expect(result.stdout.toString()).toContain("complete -F _tt_complete tt")
+  })
+
+  test("resolves config, credentials, and cache paths inside the sandboxed test root", () => {
+    const result = run(["doctor", "--json", "--no-input"])
+    expect(result.exitCode).toBe(0)
+    const envelope = JSON.parse(result.stdout.toString()) as {
+      data: { paths: Record<string, string> }
+    }
+    for (const [name, path] of Object.entries(envelope.data.paths)) {
+      const withinRoot = path === root || path.startsWith(root + sep)
+      expect(withinRoot, `${name} path "${path}" escaped the sandbox root`).toBe(true)
+    }
   })
 })
