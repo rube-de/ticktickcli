@@ -1,6 +1,6 @@
 {
   "name": "@rube-de/ticktickcli",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": false,
   "description": "Agent-first TickTick CLI for tasks, projects, habits, focus, and calendar data",
   "type": "module",
