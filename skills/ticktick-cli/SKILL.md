@@ -15,7 +15,7 @@ code as the contract; never scrape human tables when JSON is available.
 2. Run `tt auth status --verify --json --no-input` when network capability is unclear.
 3. Read `data.mode`, `data.fullCoverage`, and account-match state without printing credential data.
 4. Use v1 commands with a personal API token and v2-only commands with a verified session.
-5. Treat `capability_missing` as a request for the missing credential, not permission to obtain it.
+5. Treat `authentication_missing` as a request for the missing credential, not permission to obtain it.
 6. Never launch OAuth, request a password, or extract a session from a browser — these flows can't be
    observed in a headless run and would bypass the accepted credential channels below.
 
@@ -29,12 +29,16 @@ Never place a secret in argv, logs, fixtures, messages, or generated files.
   credentials, and logging out never touches the cache. Clearing one does not imply the other.
 - `data.fullCoverage` means a v1 token AND a v2 session are both present at once (`mode: "hybrid"`) —
   it does not mean "fully authenticated." A single valid credential still reports `fullCoverage: false`.
-- A v1 token is not enough for every mutation: `task pin/unpin`, `project archive/unarchive`, and
-  focus/organization writes require a verified v2 session even when a valid v1 token exists.
+- A v1 token is not enough for every mutation: `task pin/unpin` and `project archive/unarchive`
+  require a verified v2 session even when a valid v1 token exists. Organization writes are split
+  per resource, not uniformly v2: comments, groups, and adding a column/tag use v1; deleting a
+  column, renaming/merging/deleting a tag, and all saved-filter writes require v2. Focus writes
+  (`focus log`/`focus delete`) only need v1.
 - Dida365 is excluded from the v1 API entirely — v1 read/write only works against TickTick hosts, so
   never assume wire behavior is interchangeable between the two.
-- `tt api get` rejects any absolute or protocol-relative path, and rejects a relative path that
-  resolves to a different origin than the one configured.
+- `tt api get` rejects scheme URLs (e.g. `https://...`) and protocol-relative paths (`//...`). A
+  leading-slash path is normalized against the configured origin rather than rejected outright —
+  only a path that ends up resolving to a different origin fails.
 - `write_outcome_unknown` means either a post-write readback found zero or multiple matching
   candidates, or a transport failure happened mid-write. Re-read the resource to reconcile state
   before retrying — there is no single fixed lookup command for this.

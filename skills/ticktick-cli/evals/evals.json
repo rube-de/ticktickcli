@@ -19,7 +19,7 @@
     {
       "id": "capability-missing-credential",
       "prompt": "Sync my TickTick habits.",
-      "expected_output": "Runs `tt auth status --verify --json --no-input` first if capability is unclear. On `capability_missing`, requests the specific missing credential (e.g. TT_ACCESS_TOKEN) through one of the accepted channels rather than attempting OAuth, prompting for a password, or extracting a browser session. Never prints credential values."
+      "expected_output": "Runs `tt auth status --verify --json --no-input` first if capability is unclear. On `authentication_missing`, requests the specific missing credential (e.g. TT_ACCESS_TOKEN) through one of the accepted channels rather than attempting OAuth, prompting for a password, or extracting a browser session. Never prints credential values."
     },
     {
       "id": "batch-completion-partial-failure",
@@ -29,7 +29,7 @@
     {
       "id": "v1-token-insufficient-for-archive",
       "prompt": "Archive the 'Old Project' project. (Only a v1 personal API token is configured, no verified session.)",
-      "expected_output": "Recognizes that `project archive` requires a verified v2 session even though a v1 token is present, surfaces the capability gap (exit 3 / capability_missing) and requests a v2 session, rather than attempting the mutation with the v1 token or silently failing."
+      "expected_output": "Recognizes that `project archive` requires a verified v2 session even though a v1 token is present, surfaces the credential gap (exit 3 / authentication_missing) and requests a v2 session, rather than attempting the mutation with the v1 token or silently failing."
     },
     {
       "id": "freshness-flags-conflict",
