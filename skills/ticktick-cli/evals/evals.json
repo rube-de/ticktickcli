@@ -1,0 +1,45 @@
+{
+  "skill_name": "ticktick-cli",
+  "evals": [
+    {
+      "id": "read-today-work-profile",
+      "prompt": "What tasks do I have due today in my Work project?",
+      "expected_output": "Runs a read command such as `tt today --profile work --json --no-input` or `tt task list project:Work status:open --json --no-input --fresh`. Interprets `meta.fetchedAt`/`meta.stale` rather than assuming freshness, consumes the `data` field of the JSON envelope, and never scrapes a human-formatted table."
+    },
+    {
+      "id": "create-task-dry-run-first",
+      "prompt": "Add a high priority task 'Send status report' to my Work project, due tomorrow.",
+      "expected_output": "Runs `tt task add ... --dry-run --json --no-input` first, verifies the normalized project, due date, and priority in the dry-run output, then re-runs the same command without `--dry-run` only after confirming the fields are correct. Does not add `--yes` since this is not a destructive operation."
+    },
+    {
+      "id": "ambiguous-task-completion",
+      "prompt": "Mark 'Review PR' as done.",
+      "expected_output": "If the lookup returns multiple candidate tasks matching 'Review PR', does not guess which one to complete. Either uses a returned candidate ID after disambiguating (e.g. via a more specific query) or reports the ambiguity (exit code 4) instead of picking arbitrarily, since ambiguous candidates must never be chosen in non-interactive mode."
+    },
+    {
+      "id": "capability-missing-credential",
+      "prompt": "Sync my TickTick habits.",
+      "expected_output": "Runs `tt auth status --verify --json --no-input` first if capability is unclear. On `authentication_missing`, requests the specific missing credential (e.g. TT_ACCESS_TOKEN) through one of the accepted channels rather than attempting OAuth, prompting for a password, or extracting a browser session. Never prints credential values."
+    },
+    {
+      "id": "batch-completion-partial-failure",
+      "prompt": "Mark these five tasks as done: [list of 5 task IDs, one of which does not exist].",
+      "expected_output": "Runs the batch completion, recognizes the nonzero exit code as a partial failure (exit 5), reads every per-item result individually, preserves and reports the four successful completions, and does not retry the whole batch or discard the successes. If any item returns `write_outcome_unknown`, follows the reconciliation guidance instead of blindly retrying it."
+    },
+    {
+      "id": "v1-token-insufficient-for-archive",
+      "prompt": "Archive the 'Old Project' project. (Only a v1 personal API token is configured, no verified session.)",
+      "expected_output": "Recognizes that `project archive` requires a verified v2 session even though a v1 token is present, surfaces the credential gap (exit 3 / authentication_missing) and requests a v2 session, rather than attempting the mutation with the v1 token or silently failing."
+    },
+    {
+      "id": "freshness-flags-conflict",
+      "prompt": "Show me my tasks, but don't hit the network at all, and it's fine if the data is a bit stale.",
+      "expected_output": "Recognizes that the request implies both 'no network' and 'stale is acceptable', and picks a single freshness flag consistent with the stronger constraint — `--offline` alone — rather than combining `--offline` with `--stale-ok`, since the two are validated as mutually exclusive."
+    },
+    {
+      "id": "cache-clear-vs-logout",
+      "prompt": "Log me out and clear my cache.",
+      "expected_output": "Runs `tt auth logout` and `tt cache clear` as two separate, explicit operations rather than assuming one implies the other, since credentials and cache are independent stores."
+    }
+  ]
+}

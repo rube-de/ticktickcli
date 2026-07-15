@@ -48,6 +48,24 @@ tt --help
 
 ## Install with an agent
 
+Two ways to get an agent operating `tt`, either works:
+
+### Option 1: install the skill, then let it install the CLI
+
+If your agent supports [Agent Skills](https://agentskills.io):
+
+```sh
+npx skills add rube-de/ticktickcli
+```
+
+This installs [`skills/ticktick-cli/SKILL.md`](skills/ticktick-cli/SKILL.md) into your agent's
+skill directory. Point the agent at it (skill-aware harnesses like Claude Code load it
+automatically when relevant); its first "Establish capability" step runs `scripts/install.sh` to
+install `tt` via npm and stops before touching credentials — then follow the same v1/v2 choice
+described in [Authenticate without a browser](#authenticate-without-a-browser) below.
+
+### Option 2: copy-paste prompt
+
 Copy and paste this prompt into a coding agent that has terminal access to your macOS or Linux
 machine:
 
@@ -55,13 +73,14 @@ machine:
 Install and verify TickTick CLI (npm package `@rube-de/ticktickcli`, executable `tt`) on this
 machine.
 
-Before starting, read the Install and Authenticate without a browser sections in README.md and
-the detailed docs/authentication.md guide. If this is not a source checkout, use these canonical
-copies:
+Before starting, read the Install and Authenticate without a browser sections in README.md, the
+detailed docs/authentication.md guide, and skills/ticktick-cli/SKILL.md. If this is not a source
+checkout (skill files only exist locally after install), use these canonical copies:
 
 - https://github.com/rube-de/ticktickcli#install
 - https://github.com/rube-de/ticktickcli#authenticate-without-a-browser
 - https://github.com/rube-de/ticktickcli/blob/main/docs/authentication.md
+- https://github.com/rube-de/ticktickcli/blob/main/skills/ticktick-cli/SKILL.md
 
 Treat those docs and `tt --help` as authoritative; do not invent credential names or commands.
 
@@ -143,6 +162,15 @@ and external OAuth setup.
 
 ## Agent workflow
 
+Agents with access to [Agent Skills](https://agentskills.io) should load
+[`skills/ticktick-cli/SKILL.md`](skills/ticktick-cli/SKILL.md) first (see
+[Install with an agent](#install-with-an-agent) for `npx skills add`); harnesses like Claude Code
+do this automatically when it matches. In internal with/without-skill comparisons, agents using it
+needed roughly a third to half as many tool calls for the same tasks (3 vs. 9 to correctly diagnose
+a missing-capability error, 7 vs. 15 to resolve an ambiguous task title) because exit-code
+semantics, credential channel names, and CLI-specific gotchas are stated up front instead of
+discovered through trial and error.
+
 Use canonical noun–verb commands, explicit fields, JSON output, and non-interactive mode:
 
 ```sh
@@ -181,6 +209,8 @@ Structured output goes to stdout. Diagnostics and progress go to stderr. `--json
 
 ## Documentation
 
+- [Agent Skill](skills/ticktick-cli/SKILL.md) — canonical command patterns for AI agents;
+  install with `npx skills add rube-de/ticktickcli` or let skill-aware harnesses auto-load it
 - [Authentication](docs/authentication.md)
 - [Configuration and profiles](docs/configuration.md)
 - [Command and machine contract reference](docs/commands.md)

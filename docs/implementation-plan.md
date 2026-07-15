@@ -459,7 +459,7 @@ Errors use the same envelope:
 - Destructive operations require --yes in non-interactive mode.
 - Aliases expand CLI tokens only; they never invoke a shell, and recursion/cycles are rejected.
 
-Ship skills/SKILL.md in the first usable agent release, covering credentials, JSON, exit codes, ID resolution, dry runs, destructive operations, and capability errors.
+Ship skills/ticktick-cli/SKILL.md in the first usable agent release, covering credentials, JSON, exit codes, ID resolution, dry runs, destructive operations, and capability errors.
 
 ## 13. Testing and verification
 
