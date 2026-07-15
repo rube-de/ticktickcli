@@ -84,7 +84,7 @@ function registerTaskAdd(parent: Command): void {
         ...(startDate ? { startDate } : {}),
         ...(dueDate ? { dueDate } : {}),
         ...(options.start || options.due
-          ? { isAllDay: resolveIsAllDay(options.allDay, options.start ?? options.due) }
+          ? { isAllDay: resolveIsAllDay(options.allDay, startDate ?? dueDate) }
           : {}),
         ...(options.priority !== undefined ? { priority: parsePriority(options.priority) } : {}),
         ...(options.tags ? { tags: splitCommaValues(options.tags) } : {}),
@@ -223,7 +223,7 @@ function registerTaskEdit(parent: Command): void {
         ...(dueDate !== undefined ? { dueDate } : {}),
         ...(startDate !== undefined ? { startDate } : {}),
         ...(options.due !== undefined || options.start !== undefined
-          ? { isAllDay: resolveIsAllDay(options.allDay, options.start ?? options.due) }
+          ? { isAllDay: resolveIsAllDay(options.allDay, startDate ?? dueDate ?? undefined) }
           : options.allDay
             ? { isAllDay: true }
             : {}),

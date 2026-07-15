@@ -1,10 +1,16 @@
 import { describe, expect, test } from "bun:test"
 import { V1TaskSchema } from "../src/api/v1/schemas"
 import { resolveIsAllDay, responseHasRequestedDates } from "../src/commands/task"
+import { resolveDateExpression } from "../src/core/dates"
 
 describe("resolveIsAllDay", () => {
   test("infers all-day from a bare calendar date when --all-day is omitted", () => {
     expect(resolveIsAllDay(undefined, "2026-07-15")).toBe(true)
+  })
+
+  test("infers all-day from a normalized keyword date expression (today/tomorrow/eom)", () => {
+    const normalized = resolveDateExpression("today", "UTC").toString()
+    expect(resolveIsAllDay(undefined, normalized)).toBe(true)
   })
 
   test("does not infer all-day from a full datetime", () => {
