@@ -1,4 +1,4 @@
-import { normalizeDateTime } from "../../core/dates"
+import { dateOnlyToWireInstant, normalizeDateTime } from "../../core/dates"
 import type {
   ChecklistItemInput,
   FocusInput,
@@ -448,8 +448,8 @@ export function toV1TaskCreate(input: TaskCreateInput): V1TaskCreatePayload {
     content: input.content,
     desc: input.description,
     isAllDay: input.isAllDay,
-    startDate: input.startDate,
-    dueDate: input.dueDate,
+    startDate: toV1WireDate(input.startDate),
+    dueDate: toV1WireDate(input.dueDate),
     timeZone: input.timeZone,
     reminders: input.reminders,
     tags: input.tags,
@@ -474,8 +474,8 @@ export function toV1TaskPatch(
     content: patch.content,
     desc: patch.description,
     isAllDay: patch.isAllDay,
-    startDate: patch.startDate,
-    dueDate: patch.dueDate,
+    startDate: toV1WireDate(patch.startDate),
+    dueDate: toV1WireDate(patch.dueDate),
     timeZone: patch.timeZone,
     reminders: patch.reminders,
     tags: patch.tags,
@@ -574,6 +574,14 @@ function toV1ChecklistInput(item: ChecklistItemInput): V1ChecklistItemPayload {
     isAllDay: item.isAllDay,
     timeZone: item.timeZone,
   }) as V1ChecklistItemPayload
+}
+
+const DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/
+
+/** The v1 write endpoints require a full instant; bare calendar dates are silently dropped. */
+function toV1WireDate(value: string | null | undefined): string | null | undefined {
+  if (typeof value !== "string" || !DATE_ONLY_PATTERN.test(value)) return value
+  return dateOnlyToWireInstant(value)
 }
 
 function assertV1TaskFields(input: TaskCreateInput | TaskPatchInput): void {

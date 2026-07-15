@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test"
 
 import { isTaskOverdueForView } from "../src/commands/views"
 import {
+  dateOnlyToWireInstant,
   getDayBounds,
   isDueToday,
   isOverdue,
@@ -75,5 +76,20 @@ describe("date normalization", () => {
 
   test("honors timezone precedence", () => {
     expect(resolveTimeZone("Europe/Zurich", "UTC", "Asia/Tokyo")).toBe("Europe/Zurich")
+  })
+
+  test("anchors a bare calendar date at UTC midnight for the write wire format", () => {
+    expect(dateOnlyToWireInstant("2026-07-15")).toBe("2026-07-15T00:00:00.000+0000")
+  })
+
+  test("rejects a calendar date that does not exist", () => {
+    expect(() => dateOnlyToWireInstant("2026-02-30")).toThrow()
+  })
+
+  test("round-trips a write-wire all-day date back to the same calendar date, in any timezone", () => {
+    const wire = dateOnlyToWireInstant("2026-07-15")
+    for (const timeZone of ["UTC", "Europe/Zurich", "America/Los_Angeles", "Pacific/Auckland"]) {
+      expect(normalizeDateTime(wire, { timeZone, isAllDay: true }).localDate).toBe("2026-07-15")
+    }
   })
 })
