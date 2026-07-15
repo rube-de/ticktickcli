@@ -1,7 +1,7 @@
 import { afterAll, describe, expect, test } from "bun:test"
 import { mkdtempSync, rmSync } from "node:fs"
 import { tmpdir } from "node:os"
-import { join } from "node:path"
+import { join, sep } from "node:path"
 
 const root = mkdtempSync(join(tmpdir(), "ticktickcli-subprocess-"))
 const cwd = join(import.meta.dir, "..")
@@ -112,7 +112,8 @@ describe("CLI subprocess contract", () => {
       data: { paths: Record<string, string> }
     }
     for (const [name, path] of Object.entries(envelope.data.paths)) {
-      expect(path.startsWith(root), `${name} path "${path}" escaped the sandbox root`).toBe(true)
+      const withinRoot = path === root || path.startsWith(root + sep)
+      expect(withinRoot, `${name} path "${path}" escaped the sandbox root`).toBe(true)
     }
   })
 })
